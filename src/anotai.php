@@ -1,29 +1,34 @@
 <?php
 session_start();
 
+require_once 'models/User.php';
+
 $dsn = 'mysql:host=localhost;dbname=phpderua';
-$user = 'ederson';
+$userDB = 'ederson';
 $pass = '1234';
 
 $name = $_POST['nome'];
 $email = $_POST['email'];
 
-$db = new PDO($dsn, $user, $pass);
+if (!empty($name) && !empty($email)) {
 
-$prepared = $db->prepare("INSERT INTO users (name, email) VALUES (:name, :email)");
+  $user = new User($name, $email);
 
-$prepared->bindParam(':name', $name);
-$prepared->bindParam(':email', $email);
+  $db = new PDO($dsn, $userDB, $pass);
 
+  $prepared = $db->prepare(
+    'INSERT INTO users (name, email) VALUES (:name, :email)'
+  );
 
-$prepared->execute();
+  $prepared->bindParam(':name', $user->getName());
+  $prepared->bindParam(':email', $user->getEmail());
 
-if (!empty($_POST['nome'])){
-  $_SESSION['name'] = $name;
+  $prepared->execute();
+
+  $_SESSION['name'] = $user->getName();
+
+  $_SESSION['email'] = $user->getEmail();
+
+  print_r($user);
+  header('Location: mostrabagulho');
 }
-
-if (!empty($_POST['email'])){
-  $_SESSION['email'] = $email;
-}
-
-header('Location: mostrabagulho');
